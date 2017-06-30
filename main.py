@@ -18,7 +18,7 @@ if __name__ == '__main__':
     app.websockets = []
     async def on_shutdown(app):
         for ws in app.websockets:
-            await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
+            await ws.close()
     for route in routes:
         app.router.add_route(*route)
     app.on_shutdown.append(on_shutdown)
