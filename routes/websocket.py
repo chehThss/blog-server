@@ -1,16 +1,14 @@
 import asyncio
 import json
-from typing import Dict, Callable, Any, Coroutine, Tuple
-from aiohttp import web, WSMsgType, WSCloseCode
 from inspect import signature
+from typing import Dict, Tuple, Callable, Any
+from aiohttp import web, WSMsgType, WSCloseCode
+from . import handlers
 
-handlers: Dict[str, Callable[Any, Coroutine[Any, Any, Any]]] = {
-
-}
-
-
-class InvalidRequest(Exception):
-    pass
+global_handlers: Dict[str, Callable] = {}
+for n, (h, p) in handlers.handlers.items():
+    if 'ws' in p:
+        global_handlers[n] = h
 
 
 class Session:
@@ -102,7 +100,7 @@ class Client:
                     else:
                         session = Session(self.ws, data['id'])
                         future = asyncio.ensure_future(self.handler_wrapper(
-                            handlers[data['action']], data.get('data'), session))
+                            global_handlers[data['action']], data.get('data'), session))
                         self.sessions[data['id']] = future, session
 
                         def future_done_callback(fu):
@@ -124,7 +122,7 @@ class Client:
         except asyncio.TimeoutError as err:
             if not session.finished:
                 session.send(str(err), status=1)
-        except InvalidRequest as err:
+        except handlers.InvalidRequest as err:
             if not session.finished:
                 session.send(str(err), status=1)
         except:

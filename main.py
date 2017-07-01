@@ -1,7 +1,8 @@
-import asyncio, json
+import asyncio
+import json
 from aiohttp_session import session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
-from aiohttp import web, WSCloseCode
+from aiohttp import web
 from motor import motor_asyncio
 from routes import routes
 
@@ -16,11 +17,11 @@ if __name__ == '__main__':
     app.client = motor_asyncio.AsyncIOMotorClient(config['db'])
     app.db = app.client.get_default_database()
     app.websockets = []
-    async def on_shutdown(app):
-        for ws in app.websockets:
+    async def on_shutdown(_app):
+        for ws in _app.websockets:
             await ws.shutdown()
     for route in routes:
-        app.router.add_route(*route)
+        app.router.add_route(*route[:3], name=route[3])
     app.on_shutdown.append(on_shutdown)
 
     loop = asyncio.get_event_loop()

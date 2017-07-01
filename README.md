@@ -56,7 +56,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须使用`POST`�
 以下的所有 API，均给出了类别，名称，参数，及成功返回参数和可能的失败情况。
 
 ## API
-* `apt-list`: 
+* `apt-list`: 第一类，无参数，返回数据格式为`{"<action-name>": [<protocol-list>], ...}`
 
 ## User
 数据库中的用户信息包括如下字段：
