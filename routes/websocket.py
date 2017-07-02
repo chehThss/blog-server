@@ -1,13 +1,13 @@
 import asyncio
 import json
+import traceback
 from inspect import signature
 from typing import Dict, Tuple, Callable, Any
 from aiohttp import web, WSMsgType, WSCloseCode
-import traceback
-from . import handlers
+from handlers import handlers, InvalidRequest, Session
 
 global_handlers: Dict[str, Callable] = {}
-for n, (h, p) in handlers.handlers.items():
+for n, (h, p) in handlers.items():
     if 'ws' in p:
         global_handlers[n] = h
 
@@ -15,7 +15,7 @@ for n, (h, p) in handlers.handlers.items():
 class Client:
     def __init__(self, request: web.Request):
         self.request = request
-        self.sessions: Dict[str, Tuple[Any, handlers.Session]] = {}
+        self.sessions: Dict[str, Tuple[Any, Session]] = {}
         self.ws = web.WebSocketResponse()
 
     async def startup(self):
@@ -34,19 +34,19 @@ class Client:
                         await self.shutdown(WSCloseCode.INVALID_TEXT, message='Invalid request')
                     elif data['action'] == '$resume' or data['action'] == '$finish':
                         if data['id'] not in self.sessions:
-                            handlers.Session(self.ws, data['id']).send('Unknown session', status=1)
+                            Session(self.ws, data['id']).send('Unknown session', status=1)
                         else:
                             status = None if data['action'] == '$resume' else data['status']
                             await self.sessions[data['id']][1].feed(data.get('data'), status)
                             if status is not None:
                                 self.sessions[data['id']][0].cancel()
                     elif data['id'] in self.sessions:
-                        handlers.Session(self.ws, data['id']).send('Conflicting session', status=1)
+                        Session(self.ws, data['id']).send('Conflicting session', status=1)
                     elif data['action'] not in global_handlers:
-                        handlers.Session(self.ws, data['id']).send('Unknown action', status=1)
+                        Session(self.ws, data['id']).send('Unknown action', status=1)
                     else:
                         sid = data['id']
-                        session = handlers.Session(self.ws, sid)
+                        session = Session(self.ws, sid)
                         future = asyncio.ensure_future(self.handler_wrapper(
                             global_handlers[data['action']], data.get('data'), session))
                         self.sessions[sid] = future, session
@@ -63,7 +63,7 @@ class Client:
         for f, s in self.sessions.values():
             f.cancel()
 
-    async def handler_wrapper(self, handler, data, session: handlers.Session):
+    async def handler_wrapper(self, handler, data, session: Session):
         try:
             result = await handler(*(data, self.request, session)[:len(signature(handler).parameters)])
             if isinstance(result, BaseException):
@@ -72,7 +72,7 @@ class Client:
                 session.send(result, status=0)
         except asyncio.CancelledError:
             raise
-        except (handlers.InvalidRequest, web.HTTPClientError) as err:
+        except (InvalidRequest, web.HTTPClientError) as err:
             if not session.finished:
                 session.send(str(err), status=1)
         except:

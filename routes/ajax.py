@@ -1,11 +1,10 @@
-from aiohttp import web
-from urllib.parse import parse_qs
-from typing import Dict, Callable
-from inspect import signature
-from . import handlers
 import json
 import tempfile
-
+from inspect import signature
+from typing import Dict, Callable
+from urllib.parse import parse_qs
+from aiohttp import web
+from handlers import handlers, InvalidRequest
 
 ajax_get_handlers: Dict[str, Callable] = dict()
 ajax_post_handlers: Dict[str, Callable] = dict()
@@ -14,7 +13,7 @@ ajax_delete_handlers: Dict[str, Callable] = dict()
 ajax_patch_handlers: Dict[str, Callable] = dict()
 
 
-for n, (h, p) in handlers.handlers.items():
+for n, (h, p) in handlers.items():
     if 'ajax-get' in p:
         ajax_get_handlers[n] = h
     if 'ajax-post' in p:
@@ -79,6 +78,6 @@ async def ajax_handler(request: web.Request):
     handler = ajax_get_handlers[action]
     try:
         result = await handler(*(data, request, None)[:len(signature(handler).parameters)])
-    except handlers.InvalidRequest:
+    except InvalidRequest:
         raise web.HTTPBadRequest
     return web.Response(text=json.dumps(result, ensure_ascii=False), content_type='application/json')
