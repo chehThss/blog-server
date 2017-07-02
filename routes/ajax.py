@@ -45,6 +45,11 @@ async def ajax_handler(request: web.Request):
         if request.content_type == 'application/x-www-form-urlencoded':
             charset = request.charset or 'utf-8'
             data = parse_qs((await request.read()).decode(charset), encoding=charset)
+            for k in data.keys():
+                if len(data[k]):
+                    data[k] = data[k][0]
+                else:
+                    del data[k]
         elif request.content_type == 'application/json':
             try:
                 charset = request.charset or 'utf-8'
