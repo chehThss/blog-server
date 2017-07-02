@@ -1,0 +1,6 @@
+{
+  "db": "mongodb://localhost/blog",
+  "secret-key": "SOME KEY",
+  "host": "127.0.0.1",
+  "port": 21894
+}

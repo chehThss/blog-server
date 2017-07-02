@@ -5,6 +5,8 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 from aiohttp import web
 from motor import motor_asyncio
 from routes import routes
+from models import Models
+from middlewares import middlewares
 
 if __name__ == '__main__':
     with open('config.json') as f:
@@ -12,10 +14,11 @@ if __name__ == '__main__':
 
     app = web.Application()
     app.middlewares.extend([
-        session_middleware(EncryptedCookieStorage(config['secret-key']))
+        session_middleware(EncryptedCookieStorage(config['secret-key'])),
+        *middlewares
     ])
-    app.client = motor_asyncio.AsyncIOMotorClient(config['db'])
-    app.db = app.client.get_default_database()
+    client = motor_asyncio.AsyncIOMotorClient(config['db'])
+    app.models = Models(client.get_default_database())
     app.websockets = []
     async def on_shutdown(_app):
         for ws in _app.websockets:
@@ -35,7 +38,7 @@ if __name__ == '__main__':
     finally:
         print('stopping server')
         srv.close()
-        app.client.close()
+        client.close()
         loop.run_until_complete(srv.wait_closed())
         loop.run_until_complete(app.shutdown())
         loop.run_until_complete(handler.shutdown(60.0))
