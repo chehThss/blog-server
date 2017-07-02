@@ -28,6 +28,7 @@ if __name__ == '__main__':
     app.on_shutdown.append(on_shutdown)
 
     loop = asyncio.get_event_loop()
+    loop.run_until_complete(app.models.startup())
     handler = app.make_handler(loop=loop)
     srv = loop.run_until_complete(loop.create_server(handler, config['host'], config['port']))
     print('serving on http://%s:%d' % srv.sockets[0].getsockname())

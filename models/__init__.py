@@ -6,3 +6,6 @@ class Models:
     def __init__(self, db: motor_asyncio.AsyncIOMotorDatabase):
         self.db = db
         self.user = User(db)
+
+    async def startup(self):
+        await self.user.startup()

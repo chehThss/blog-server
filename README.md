@@ -35,7 +35,8 @@ passed from the python server to the client via reverse proxy and WebSocket.
 
 AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST`请求，无状态的一般会支持`POST`。WebSocket 的路由路径为 `/ws`。
 
-对于 AJAX 访问返回数据一律采用 JSON。每一个请求对应一个响应。如果请求数据格式对或是不支持的`action`，则会返回 400。对于服务器出现内部错误的，返回 502。
+对于 AJAX 访问返回数据一律采用 JSON。每一个请求对应一个响应。如果请求数据格式不对或是不支持的`action`，则会返回 400。对于服务器出现内部错误的，返回 502。
+响应也是 JSON，与 WebSocket 的结束响应的区别在于没有`id`和`action`字段。理论上来说`status`字段不可能为2（内部错误会返回502）
 
 所有的 WebSocket 连接都以 JSON 作为传输数据格式。如果请求数据格式不是 JSON，或者缺乏`id`和`action`字段，或者`id`和`action`
 字段不是字符串类型，则直接断开连接；对于`action`不存在或不支持的及无对应的`id`，返回出错响应。回话的生命周期从一方的开始信号一直到一方的结束信号。

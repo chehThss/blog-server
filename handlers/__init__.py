@@ -1,7 +1,8 @@
 from typing import Dict, Tuple, Set, Callable
-from .examples import handlers as examples_handlers
 from .session import Session
 from .exception import InvalidRequest
+from .examples import handlers as examples_handlers
+from .user import handlers as user_handlers
 
 async def api_list():
     result = {}
@@ -14,3 +15,4 @@ handlers: Dict[str, Tuple[Callable, Set[str]]] = {
 }
 
 handlers.update(examples_handlers)
+handlers.update(user_handlers)
