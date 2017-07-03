@@ -8,7 +8,6 @@ ROLE_EDITOR = 'editor'
 def set_session(session, user_id):
     session['user'] = str(user_id)
     session['last_visit'] = time()
-    #redirect(request, 'main')
 
 async def user_add(data, request):
     user = request.app.models.user
@@ -28,7 +27,7 @@ async def user_remove(data, request):
 async def user_login(data, request):
     user = request.app.models.user
     # TODO: check input
-    user_id = user.check_user(data['username'], data['password'])
+    user_id = await user.check_user(data['username'], data['password'])
     session = await get_session(request)
     set_session(session, user_id)
     # TODO: redirect
@@ -40,7 +39,6 @@ async def check_session(request):
         #TODO: redirect
 
 async def user_signout(request):
-    #user = request.app.models.user
     session = await get_session(request)
     if 'user' in session:
         del session['user']

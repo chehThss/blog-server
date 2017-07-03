@@ -44,13 +44,3 @@ class User:
         if result['password'] != psw:
             raise InvalidRequest('Wrong password')
         return result['_id']
-
-    # async def signout(self, id):
-    #     result = await self._db.find_one_and_update(
-    #         {'_id': ObjectId(id)},
-    #         {'$set': {'login': False}},
-    #         return_document = ReturnDocument.BEFORE)
-    #     if result is None:
-    #         raise InvalidRequest('User does not exist')
-    #     if not result['login']:
-    #         raise InvalidRequest("User already signs out")
