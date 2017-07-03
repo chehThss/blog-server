@@ -82,6 +82,8 @@ async def ajax_handler(request: web.Request):
                 field = await multipart.next()
         else:
             raise web.HTTPBadRequest()
+    elif request.method == web.hdrs.METH_OPTIONS:
+        return web.Response()
     else:
         raise web.HTTPMethodNotAllowed(request.method, global_handlers.keys())
     if action not in global_handlers[request.method]:

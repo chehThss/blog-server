@@ -9,4 +9,5 @@ routes: List[Tuple[str, str, Callable, str]] = [
     ('PUT', '/api/{action}', ajax_handler, 'ajax-put'),
     ('DELETE', '/api/{action}', ajax_handler, 'ajax-delete'),
     ('PATCH', '/api/{action}', ajax_handler, 'ajax-patch'),
+    ('OPTIONS', '/api/{action}', ajax_handler, 'ajax-options'),
 ]
