@@ -35,7 +35,7 @@ async def subscribe(data, request, session):
         await asyncio.sleep(data)
 
 handlers = {
-    'hello': (hello, {'ajax-get', 'ws'}),
-    'echo': (echo, {'ajax-get', 'ajax-post', 'ajax-put', 'ajax-delete', 'ajax-patch', 'ws'}), # Supports all protocol
-    'subscribe': (subscribe, 'ws')
+    'hello': (hello, ('ajax-get', 'ws')),
+    'echo': (echo, ('ajax-get', 'ajax-post', 'ajax-put', 'ajax-delete', 'ajax-patch', 'ws')), # Supports all protocol
+    'subscribe': (subscribe, ('ws',))
 }
