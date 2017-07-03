@@ -47,10 +47,10 @@ async def user_signout(request):
         raise InvalidRequest("User already signs out")
 
 handlers = {
-    'user-add': (user_add, {'ajax-post', 'ws'}),
-    'user-info': (user_info, {'ajax-get', 'ws'}),
-    'user-remove': (user_remove, {'ajax-delete', 'ws'}),
-    'user-login': (user_login, {'ajax-post', 'ws'}),
-    'check-session': (check_session, {'ajax-get', 'ws'}),
-    'user-signout': (user_signout, {'ajax-get', 'ws'}),
+    'user-add': (user_add, ('ajax-post', 'ws')),
+    'user-info': (user_info, ('ajax-get', 'ws')),
+    'user-remove': (user_remove, ('ajax-delete', 'ws')),
+    'user-login': (user_login, ('ajax-post', 'ws')),
+    'check-session': (check_session, ('ajax-get', 'ws')),
+    'user-signout': (user_signout, ('ajax-get', 'ws')),
 }

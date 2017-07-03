@@ -1,7 +1,6 @@
 from motor import motor_asyncio
 from handlers.exception import InvalidRequest
 from bson import ObjectId
-from pymongo import ReturnDocument
 
 class User:
     def __init__(self, db: motor_asyncio.AsyncIOMotorDatabase):
