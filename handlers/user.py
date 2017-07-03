@@ -27,9 +27,9 @@ async def user_signout(data, request):
     return await user.signout(data['id'])
 
 handlers = {
-    'user-add': (user_add, {'ajax-post', 'ws'}),
-    'user-info': (user_info, {'ajax-get', 'ws'}),
-    'user-remove': (user_remove, {'ajax-delete', 'ws'}),
-    'user-login': (user_login, {'ajax-post', 'ws'}),
-    'user-signout': (user_signout, {'ajax-post', 'ws'}),
+    'user-add': (user_add, ('ajax-post', 'ws')),
+    'user-info': (user_info, ('ajax-get', 'ws')),
+    'user-remove': (user_remove, ('ajax-delete', 'ws')),
+    'user-login': (user_login, ('ajax-post', 'ws')),
+    'user-signout': (user_signout, ('ajax-post', 'ws')),
 }
