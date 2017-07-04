@@ -33,8 +33,8 @@ class User:
             result['_id'] = str(result['_id'])
         return result
 
-    async def remove(self, id):
-        if await self._db.find_one_and_delete({'_id': ObjectId(id)}) is None:
+    async def remove(self, uid):
+        if await self._db.find_one_and_delete({'_id': ObjectId(uid)}) is None:
             raise InvalidRequest('User does not exist')
 
     async def check_user(self, username, psw):
@@ -47,3 +47,18 @@ class User:
         if result['password'] != psw:
             raise InvalidRequest('Wrong password')
         return str(result['_id'])
+
+    async def role(self, uid):
+        result = self._db.find_one({'_id': ObjectId(uid)}, projection = {
+            'role': True
+        })
+        if result is None:
+            raise InvalidRequest('User does not exist')
+        return result['role']
+
+    async def set_password(self, uid, password):
+        if await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'password': password}}
+        ) is None:
+            raise InvalidRequest('User does not exist')

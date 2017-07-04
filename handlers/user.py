@@ -45,6 +45,16 @@ async def logout(data, request):
     else:
         raise InvalidRequest('User already logout')
 
+async def user_set_password(data, request):
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    if data['id'] != session['uid']:
+        raise InvalidRequest('Permission denied')
+    await user.set_password(data['id'], data['password'])
+    # TODO: sign out other devices
+
 handlers = {
     'user-add': (user_add, ('ajax-post', 'ws')),
     'user-info': (user_info, ('ajax-get', 'ws')),
@@ -52,5 +62,6 @@ handlers = {
     'login': (login, ('ajax-post', 'ws')),
     'logout': (logout, ('ajax-get', 'ws')),
     'check-session': (check_session, ('ajax-get', 'ws')),
+    'user-set-password': (user_set_password, ('ajax-post')),
 }
 

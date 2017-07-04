@@ -75,7 +75,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [ ] `user-set-role`: 支持`ajax-post`和`ws`，输入为`id`和`role`，需要`'administrator'`权限
 - [ ] `user-get-settings`: 支持`ajax-get`
 - [ ] `user-set-settings`: 支持`ajax-post`
-- [ ] `user-set-password`: 支持`ajax-post`
+- [x] `user-set-password`: 支持`ajax-post`，输入为`id`和`password`，需要`id`为用户本人
 
 回话的登入登出：
 - [x] `login`: 支持`ajax-post`和`ws`，输入为用户名密码 
