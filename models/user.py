@@ -33,8 +33,8 @@ class User:
             result['_id'] = str(result['_id'])
         return result
 
-    async def remove(self, id):
-        if await self._db.find_one_and_delete({'_id': ObjectId(id)}) is None:
+    async def remove(self, uid):
+        if await self._db.find_one_and_delete({'_id': ObjectId(uid)}) is None:
             raise InvalidRequest('User does not exist')
 
     async def check_user(self, username, psw):
@@ -47,3 +47,46 @@ class User:
         if result['password'] != psw:
             raise InvalidRequest('Wrong password')
         return str(result['_id'])
+
+    async def list(self):
+        result = []
+        async for record in self._db.find():
+            result.append(str(record['_id']))
+        return result
+
+    async def get_settings(self, uid):
+        result = await self._db.find_one({'_id': ObjectId(uid)})
+        if result is None:
+            raise InvalidRequest('User does not exist')
+        return result['settings']
+
+    async def set_settings(self, uid, settings):
+        result = await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'settings': settings}}
+        )
+        if result is None:
+            raise InvalidRequest('User does not exist')
+
+    async def role(self, uid):
+        result = await self._db.find_one({'_id': ObjectId(uid)}, projection = {
+            'role': True
+        })
+        if result is None:
+            raise InvalidRequest('User does not exist')
+        return result['role']
+
+    async def set_role(self, uid, role):
+        result = await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'role': role}}
+        )
+        if result is None:
+            raise InvalidRequest('User does not exist')
+
+    async def set_password(self, uid, password):
+        if await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'password': password}}
+        ) is None:
+            raise InvalidRequest('User does not exist')
