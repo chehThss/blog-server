@@ -18,15 +18,19 @@ class User:
             'role': role
         })).inserted_id)
 
-    async def info(self, uid):
-        result = await self._db.find_one({'_id': ObjectId(uid)}, projection={
-            '_id': False,
-            'user': True,
-            'avatar': True,
-            'role': True
-        })
+    async def info(self, uid, projection=None):
+        if projection is None:
+            projection = {
+                '_id': False,
+                'user': True,
+                'avatar': True,
+                'role': True
+            }
+        result = await self._db.find_one({'_id': ObjectId(uid)}, projection=projection)
         if result is None:
             raise InvalidRequest('User does not exist')
+        if '_id' in result:
+            result['_id'] = str(result['_id'])
         return result
 
     async def remove(self, id):
@@ -42,4 +46,4 @@ class User:
             raise InvalidRequest('User does not exist')
         if result['password'] != psw:
             raise InvalidRequest('Wrong password')
-        return result['_id']
+        return str(result['_id'])
