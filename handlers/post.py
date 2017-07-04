@@ -23,6 +23,15 @@ async def post_list(data, request):
     post: Post = request.app.models.post
     return await post.list()
 
+async def post_update(data, request):
+    post: Post = request.app.models.post
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    if str((await post.info(data['id'], {'owner': True}))['owner']) != session['uid']:
+        raise InvalidRequest('Permission denied')
+    return await post.update(data)
+
 async def post_info(data, request):
     post: Post = request.app.models.post
     return await post.info(data['id'])
@@ -31,5 +40,6 @@ handlers = {
     'post-publish': (post_publish, ('ajax-post')),
     'post-unpublish': (post_unpublish, ('ajax-delete')),
     'post-list': (post_list, ('ajax-get')),
+    'post-update': (post_update, ('ajax-post')),
     'post-info': (post_info, ('ajax-get', 'ws'))
 }

@@ -36,6 +36,24 @@ class Post:
             result.append(str(record['_id']))
         return result
 
+    async def update(self, data):
+        all_data = await self._db.find_one({'_id': ObjectId(data['id'])})
+        if all_data is None:
+            raise InvalidRequest('Post does not exist')
+        for x in data.keys():
+            all_data[x] = data[x]
+        await self._db.find_one_and_update({'_id': ObjectId(data['id'])}, {'$set': {
+            'title': all_data['title'],
+            'owner': all_data['owner'],
+            'path': all_data['path'],
+            'date': time(),
+            'categories': all_data['categories'],
+            'tags': all_data['tags'],
+            'image': all_data['image'],
+            'excerpt': all_data['excerpt'],
+            'content': all_data['content']
+        }})
+
     async def info(self, pid, projection=None):
         if projection is None:
             projection = {
