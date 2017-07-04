@@ -1,26 +1,34 @@
 from motor import motor_asyncio
 from handlers.exception import InvalidRequest
 from bson import ObjectId
+from .event import Event
+
 
 class User:
-    def __init__(self, db: motor_asyncio.AsyncIOMotorDatabase):
-        self._db: motor_asyncio.AsyncIOMotorCollection = db['user']
+    def __init__(self, models):
+        self.db: motor_asyncio.AsyncIOMotorCollection = models.db['user']
+        self.event: Event = models.event
 
     async def startup(self):
-        await self._db.find_one_and_update(
+        await self.db.find_one_and_update(
             {'user': 'root'},
-            {'$set': {'password':'root', 'role':'administrator'}},
+            {'$set': {'password': 'root', 'role': 'administrator'}},
             upsert=True)
-        await self._db.create_index('user')
+        await self.db.create_index('user')
 
     async def add(self, username, password, role):
-        if await self._db.find_one({'user': username}) is not None:
+        if await self.db.find_one({'user': username}) is not None:
             raise InvalidRequest('User already exists')
-        return str((await self._db.insert_one({
+        result = await self.db.insert_one({
             'user': username,
             'password': password,
             'role': role
-        })).inserted_id)
+        })
+        self.event.emit('user-add', {
+            'id': result.inserted_id,
+            'user': username
+        })
+        return str(result.inserted_id)
 
     async def info(self, uid, projection=None):
         if projection is None:
@@ -30,7 +38,7 @@ class User:
                 'avatar': True,
                 'role': True
             }
-        result = await self._db.find_one({'_id': ObjectId(uid)}, projection=projection)
+        result = await self.db.find_one({'_id': ObjectId(uid)}, projection=projection)
         if result is None:
             raise InvalidRequest('User does not exist')
         if '_id' in result:
@@ -38,11 +46,16 @@ class User:
         return result
 
     async def remove(self, uid):
-        if await self._db.find_one_and_delete({'_id': ObjectId(uid)}) is None:
+        result = await self.db.find_one_and_delete({'_id': ObjectId(uid)},projection={'user':True})
+        if result is None:
             raise InvalidRequest('User does not exist')
+        self.event.emit('user-remove', {
+            'id': uid,
+            'user': result['user']
+        })
 
     async def check_user(self, username, psw):
-        result = await self._db.find_one({'user': username}, projection = {
+        result = await self.db.find_one({'user': username}, projection={
             'password': True,
             '_id': True
         })
@@ -54,18 +67,18 @@ class User:
 
     async def list(self):
         result = []
-        async for record in self._db.find():
+        async for record in self.db.find():
             result.append(str(record['_id']))
         return result
 
     async def get_settings(self, uid):
-        result = await self._db.find_one({'_id': ObjectId(uid)})
+        result = await self.db.find_one({'_id': ObjectId(uid)})
         if result is None:
             raise InvalidRequest('User does not exist')
         return result['settings']
 
     async def set_settings(self, uid, settings):
-        result = await self._db.find_one_and_update(
+        result = await self.db.find_one_and_update(
             {'_id': ObjectId(uid)},
             {'$set': {'settings': settings}}
         )
@@ -73,7 +86,7 @@ class User:
             raise InvalidRequest('User does not exist')
 
     async def role(self, uid):
-        result = await self._db.find_one({'_id': ObjectId(uid)}, projection = {
+        result = await self.db.find_one({'_id': ObjectId(uid)}, projection={
             'role': True
         })
         if result is None:
@@ -81,7 +94,7 @@ class User:
         return result['role']
 
     async def set_role(self, uid, role):
-        result = await self._db.find_one_and_update(
+        result = await self.db.find_one_and_update(
             {'_id': ObjectId(uid)},
             {'$set': {'role': role}}
         )
@@ -89,7 +102,7 @@ class User:
             raise InvalidRequest('User does not exist')
 
     async def set_password(self, uid, password):
-        if await self._db.find_one_and_update(
+        if await self.db.find_one_and_update(
             {'_id': ObjectId(uid)},
             {'$set': {'password': password}}
         ) is None:

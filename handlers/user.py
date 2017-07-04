@@ -22,7 +22,7 @@ async def user_remove(data, request):
     if 'uid' not in session:
         raise InvalidRequest('Login required')
     # TODO: check input
-    if data != session['uid'] or (await user.info(session['uid'], {'role': True}))['role'] != ROLE_ADMIN:
+    if data != session['uid'] and (await user.info(session['uid'], {'role': True}))['role'] != ROLE_ADMIN:
         raise InvalidRequest('Permission denied')
     return await user.remove(data)
 
