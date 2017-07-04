@@ -81,7 +81,8 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `login`: 支持`ajax-post`和`ws`，输入为用户名密码 
 - [x] `logout`: 支持`ajax-get`和`ws`
 
-
 ## Content（Post，Static Files） 
+首先是内容的管理
+
 
 ## Log

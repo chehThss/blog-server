@@ -8,6 +8,7 @@ from motor import motor_asyncio
 from routes import routes
 from models import Models
 from middlewares import middlewares
+from os.path import isdir
 
 
 class App:
@@ -21,6 +22,7 @@ class App:
 
     async def startup(self):
         self.app = web.Application()
+        self.app.config = self.config
         self.redis_pool = await aioredis.create_pool(('localhost', 6379))
         self.app.middlewares.extend([
             session_middleware(RedisStorage(self.redis_pool)),
@@ -52,7 +54,10 @@ class App:
 
 if __name__ == '__main__':
     with open('config.json') as f:
-        app = App(json.load(f))
+        global_config = json.load(f)
+    if not isdir(global_config['upload-path']):
+        raise RuntimeError('Upload path does not exist')
+    app = App(global_config)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(app.startup())
     print('serving on http://%s:%d' % app.server.sockets[0].getsockname())

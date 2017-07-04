@@ -1,3 +1,4 @@
+import os
 import json
 import tempfile
 from inspect import signature
@@ -64,18 +65,19 @@ async def ajax_handler(request: web.Request):
                 size = 0
                 content_type = field.headers.get(web.hdrs.CONTENT_TYPE)
                 if field.filename:
-                    tmp = tempfile.TemporaryFile()
+                    fd, path = tempfile.mkstemp()
                     chunk = await field.read_chunk(size=2**16)
                     while chunk:
                         chunk = field.decode(chunk)
-                        tmp.write(chunk)
+                        os.write(fd, chunk)
                         size += len(chunk)
                         chunk = await field.read_chunk(size=2**16)
-                    data[field.name] = web.FileField(field.name, field.filename, tmp, content_type, field.headers)
+                    os.close(fd)
+                    data[field.name] = web.FileField(field.name, field.filename, path, content_type, field.headers)
                 else:
                     value = await field.read(decode=True)
                     if content_type is None or content_type.startswith('text/'):
-                        charset=field.get_charset(default='utf-8')
+                        charset = field.get_charset(default='utf-8')
                         value = value.decode(charset)
                     data[field.name] = value
                     size += len(value)
@@ -96,6 +98,8 @@ async def ajax_handler(request: web.Request):
             'status': 1,
             'data': str(err)
         }, ensure_ascii=False), content_type='application/json')
+    if isinstance(result, web.StreamResponse):
+        return result
     return web.Response(text=json.dumps({
         'status': 0,
         **({'data': result} if result is not None else {})
