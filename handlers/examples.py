@@ -2,7 +2,7 @@ import asyncio
 from .exception import InvalidRequest
 
 async def hello():
-    return "hello"
+    return "hello, world"
 
 async def echo(data, request, session):
     # Returns all the data its received

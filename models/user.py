@@ -7,6 +7,10 @@ class User:
         self._db: motor_asyncio.AsyncIOMotorCollection = db['user']
 
     async def startup(self):
+        await self._db.find_one_and_update(
+            {'user': 'root'},
+            {'$set': {'password':'root', 'role':'administrator'}},
+            upsert=True)
         await self._db.create_index('user')
 
     async def add(self, username, password, role):

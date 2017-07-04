@@ -59,7 +59,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `apt-list`: 第一类，无参数，返回数据格式为`{"<action-name>": [<protocol-list>], ...}`
 
 ## User
-数据库中的用户信息包括如下字段：
+数据库`user`中的用户信息包括如下字段：
 * `_id`: MongoDB 自带ID
 * `user`: 用户名
 * `password`: 密码
@@ -82,7 +82,41 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `logout`: 支持`ajax-get`和`ws`
 
 ## Content（Post，Static Files） 
-首先是内容的管理
+首先是底层内容的管理。每个用户包含独立的目录，其中子目录`public`下为共享内容，可被外界访问。
+
+- [x] `file-put`：支持`ajax-post`，要求登录，提供`path`和可选的`file`和`name`参数。
+- [x] `file-get`：支持`ajax-get`，要求登录，提供`file`参数
+- [ ] `file-remove`：支持`ajax-delete`，要求登录，提供`file`参数
+- [ ] `file-move`：支持`ajax-post`，要求登录，提供`source`参数，`target`参数
+
+然后是上层的博客，数据库`post`中包含以下字段：
+* `_id`
+* `title`：标题
+* `owner`：所有者用户，字符串
+* `path`：文件路径，必须是所有者用户`public`目录下的文件
+* `date`：创建时间
+* `categories`: 字符串列表
+* `tags`：字符串列表
+* `image`：可选，题图路径
+* `excerpt`：可选，摘要
+* `content`：搜索
+
+- [ ] `post-publish`
+- [ ] `post-unpublish`
+- [ ] `post-list`
+- [ ] `post-update`
+- [ ] `post-info`
+- [ ] `post-search`
+
+数据库`post_categories`中包含以下字段，有个特殊的元素叫做`$root`
+* `name`
+* `parent`
+* `children`
+
+- [ ] `category-add`
+- [ ] `category-remove`
+- [ ] `category-update`
+- [ ] `category-get`
 
 
 ## Log
