@@ -73,8 +73,8 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `user-add`: 支持`ajax-post`和`ws`，输入用户名和密码，返回`_id`，默认创建的为`'editor'`用户
 - [x] `user-remove`: 支持`ajax-delete`和`ws`，输入为`id`，需要`'administrator'`权限，或者为`id`为用户本人
 - [x] `user-set-role`: 支持`ajax-post`和`ws`，输入为`id`和`role`，需要`'administrator'`权限
-- [ ] `user-get-settings`: 支持`ajax-get`
-- [ ] `user-set-settings`: 支持`ajax-post`
+- [x] `user-get-settings`: 支持`ajax-get`，返回当前用户的`settings`
+- [x] `user-set-settings`: 支持`ajax-post`，输入为`settings`，设置当前用户的`settings`
 - [x] `user-set-password`: 支持`ajax-post`，输入为`id`和`password`，需要`id`为用户本人
 
 回话的登入登出：

@@ -54,6 +54,20 @@ async def user_list(data, request):
         raise InvalidRequest('Permission denied')
     return await user.list()
 
+async def user_get_settings(data, request):
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    return await user.get_settings(session['uid'])
+
+async def user_set_settings(data, request):
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    return await user.set_settings(session['uid'], data['settings'])
+
 async def user_set_role(data, request):
     user: User = request.app.models.user
     session = await get_session(request)
@@ -81,6 +95,8 @@ handlers = {
     'logout': (logout, ('ajax-get', 'ws')),
     'check-session': (check_session, ('ajax-get', 'ws')),
     'user-list': (user_list, ('ajax-get', 'ws')),
+    'user-get-settings': (user_get_settings, ('ajax-get')),
+    'user-set-settings': (user_set_settings, ('ajax-post')),
     'user-set-role': (user_set_role, ('ajax-post', 'ws')),
     'user-set-password': (user_set_password, ('ajax-post')),
 }

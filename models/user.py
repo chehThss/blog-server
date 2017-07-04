@@ -54,6 +54,20 @@ class User:
             result.append(str(record['_id']))
         return result
 
+    async def get_settings(self, uid):
+        result = await self._db.find_one({'_id': ObjectId(uid)})
+        if result is None:
+            raise InvalidRequest('User does not exist')
+        return result['settings']
+
+    async def set_settings(self, uid, settings):
+        result = await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'settings': settings}}
+        )
+        if result is None:
+            raise InvalidRequest('User does not exist')
+
     async def role(self, uid):
         result = await self._db.find_one({'_id': ObjectId(uid)}, projection = {
             'role': True
