@@ -49,12 +49,20 @@ class User:
         return str(result['_id'])
 
     async def role(self, uid):
-        result = self._db.find_one({'_id': ObjectId(uid)}, projection = {
+        result = await self._db.find_one({'_id': ObjectId(uid)}, projection = {
             'role': True
         })
         if result is None:
             raise InvalidRequest('User does not exist')
         return result['role']
+
+    async def set_role(self, uid, role):
+        result = await self._db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {'role': role}}
+        )
+        if result is None:
+            raise InvalidRequest('User does not exist')
 
     async def set_password(self, uid, password):
         if await self._db.find_one_and_update(

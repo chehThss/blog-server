@@ -45,6 +45,15 @@ async def logout(data, request):
     else:
         raise InvalidRequest('User already logout')
 
+async def user_set_role(data, request):
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    if (await user.info(session['uid'], {'role': True}))['role'] != ROLE_ADMIN:
+        raise InvalidRequest('Permission denied')
+    return await user.set_role(data['id'], data['role'])
+
 async def user_set_password(data, request):
     user: User = request.app.models.user
     session = await get_session(request)
@@ -62,6 +71,7 @@ handlers = {
     'login': (login, ('ajax-post', 'ws')),
     'logout': (logout, ('ajax-get', 'ws')),
     'check-session': (check_session, ('ajax-get', 'ws')),
+    'user-set-role': (user_set_role, ('ajax-post', 'ws')),
     'user-set-password': (user_set_password, ('ajax-post')),
 }
 
