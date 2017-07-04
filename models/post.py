@@ -73,3 +73,9 @@ class Post:
         if '_id' in result:
             result['_id'] = str(result['_id'])
         return result
+
+    async def search(self, content):
+        result = []
+        async for record in self._db.find({'$text':{'$search': content}}):
+            result.append(str(record['_id']))
+        return result

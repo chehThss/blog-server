@@ -106,7 +106,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `post-list`：支持`ajax-get`，无权限要求，返回所有`post`的`id`列表
 - [x] `post-update`：支持`ajax-post`，要求登录，提供`id`和除`date`以外的任意字段，并将`date`改为更改时间
 - [x] `post-info`：支持`ajax-get`和`ws`，无权限要求，返回除`content`外的所有字段
-- [ ] `post-search`
+- [x] `post-search`：支持`ajax-get`，无权限要求，查找还很zz，返回包含查找关键词的`post`的`id`列表
 
 数据库`post_categories`中包含以下字段，有个特殊的元素叫做`$root`
 * `name`

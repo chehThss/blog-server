@@ -36,10 +36,15 @@ async def post_info(data, request):
     post: Post = request.app.models.post
     return await post.info(data['id'])
 
+async def post_search(data, request):
+    post: Post = request.app.models.post
+    return await post.search(data['content'])
+
 handlers = {
     'post-publish': (post_publish, ('ajax-post')),
     'post-unpublish': (post_unpublish, ('ajax-delete')),
     'post-list': (post_list, ('ajax-get')),
     'post-update': (post_update, ('ajax-post')),
-    'post-info': (post_info, ('ajax-get', 'ws'))
+    'post-info': (post_info, ('ajax-get', 'ws')),
+    'post-search': (post_search, ('ajax-get'))
 }
