@@ -5,8 +5,8 @@ from handlers.exception import InvalidRequest
 from bson import ObjectId
 
 class Post:
-    def __init__(self, db: motor_asyncio.AsyncIOMotorDatabase):
-        self._db: motor_asyncio.AsyncIOMotorCollection = db['post']
+    def __init__(self, models):
+        self._db: motor_asyncio.AsyncIOMotorCollection = models.db['post']
 
     async def startup(self):
         index_date = IndexModel([('date', DESCENDING)])
