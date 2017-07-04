@@ -1,6 +1,5 @@
 from aiohttp_session import get_session
 from .exception import InvalidRequest
-from git import Repo
 from os import path, makedirs, listdir
 from aiohttp import web
 from shutil import move
@@ -10,9 +9,6 @@ async def file_put(data, request):
     if 'uid' not in session:
         raise InvalidRequest('Login required')
     repo_path = path.join(request.app.config['upload-path'], session['uid'])
-    if not path.isdir(repo_path):
-        repo = Repo.init(repo_path)
-        del repo
     file_path: str = data['path']
     if file_path.startswith('/'):
         file_path = '.' + file_path
@@ -31,6 +27,9 @@ async def file_get(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
+    repo_path = path.join(request.app.config['upload-path'], session['uid'])
+    if not path.isdir(repo_path):
+        makedirs(repo_path)
     file = data['file']
     if file.startswith('/'):
         file = '.' + file
