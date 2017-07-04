@@ -1,0 +1,35 @@
+from aiohttp_session import get_session
+from .exception import InvalidRequest
+# Using Python's typing to help auto-completion and refactor
+from models import User, Post
+
+async def post_publish(data, request):
+    post: Post = request.app.models.post
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    await post.publish(data['title'], session['uid'], data['path'], data['categories'], data['tags'], data['content'])
+
+async def post_unpublish(data, request):
+    post: Post = request.app.models.post
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    if str((await post.info(data, {'owner': True}))['owner']) != session['uid']:
+        raise InvalidRequest('Permission denied')
+    return await post.unpublish(data)
+
+async def post_list(data, request):
+    post: Post = request.app.models.post
+    return await post.list()
+
+async def post_info(data, request):
+    post: Post = request.app.models.post
+    return await post.info(data['id'])
+
+handlers = {
+    'post-publish': (post_publish, ('ajax-post')),
+    'post-unpublish': (post_unpublish, ('ajax-delete')),
+    'post-list': (post_list, ('ajax-get')),
+    'post-info': (post_info, ('ajax-get', 'ws'))
+}
