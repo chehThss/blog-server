@@ -68,7 +68,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `settings`: JSON 字符串，客户端决定
 
 对于服务端，包含如下操作：
-- [ ] `user-list`: 支持`ajax-get`和`ws`，返回用户`_id`的列表
+- [x] `user-list`: 支持`ajax-get`和`ws`，返回用户`_id`的列表
 - [x] `user-info`: 支持`ajax-get`和`ws`，返回用户的姓名、头像路径和
 - [x] `user-add`: 支持`ajax-post`和`ws`，输入用户名和密码，返回`_id`，默认创建的为`'editor'`用户
 - [x] `user-remove`: 支持`ajax-delete`和`ws`，输入为`id`，需要`'administrator'`权限，或者为`id`为用户本人

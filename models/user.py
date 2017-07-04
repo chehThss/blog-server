@@ -48,6 +48,12 @@ class User:
             raise InvalidRequest('Wrong password')
         return str(result['_id'])
 
+    async def list(self):
+        result = []
+        async for record in self._db.find():
+            result.append(str(record['_id']))
+        return result
+
     async def role(self, uid):
         result = await self._db.find_one({'_id': ObjectId(uid)}, projection = {
             'role': True
