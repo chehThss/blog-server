@@ -113,16 +113,17 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `parent`
 * `children`
 
-- [ ] `category-add`
-- [ ] `category-remove`
-- [ ] `category-update`
-- [ ] `category-get`
+- [x] `category-add`：支持`ajax-post`，需要`administrator`权限，输入`name`和`parent`
+- [x] `category-remove`：支持`ajax-delete`，需要`administrator`权限，输入`name`
+- [x] `category-update`：支持`ajax-post`，需要`administrator`权限，输入`name`、`rename`和`parent`（后两者可为空）
+- [x] `category-get`：支持`ajax-get`，无权限要求，输入为`name`，返回所有字段（包括`id`）
+- [x] `category-info`：支持`ajax-get`，无权限要求，输入为`id`，返回所有字段（包括`id`）
 
 `settings`中包含一下字段：
 * `key`
 * `value`
 
-- [x] `settings-get`: 返回所有键值对
+- [x] `settings-get`: 返回所有键值对，无权限要求
 - [x] `settings-set`: 需要`administrator`权限，输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
 
 
