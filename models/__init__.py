@@ -1,5 +1,6 @@
 from motor import motor_asyncio
 from .user import User
+from .post import Post
 from .event import Event
 from .file import Repo
 
@@ -12,9 +13,11 @@ class Models:
         self.event = Event()
         self.user = User(self)
         self.file = Repo(self)
+        self.post = Post(self)
 
     async def startup(self):
         await self.user.startup()
+        await self.post.startup()
 
     async def shutdown(self):
         self.client.close()
