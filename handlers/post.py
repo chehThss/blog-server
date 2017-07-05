@@ -8,7 +8,8 @@ async def post_publish(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
-    await post.publish(data['title'], session['uid'], data['path'], data['categories'], data['tags'], data['content'])
+    await post.publish(data.get('title'), session['uid'], data['path'], data.get('categories'),\
+                       data.get('tags'), data.get('content'), data.get('image'), data.get('excerpt'))
 
 async def post_unpublish(data, request):
     post: Post = request.app.models.post

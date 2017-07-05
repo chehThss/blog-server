@@ -1,6 +1,6 @@
 from models import Settings
 
-# settings_set
+
 async def settings_get(data, request):
     settings: Settings = request.app.models.settings
     return await settings.get()

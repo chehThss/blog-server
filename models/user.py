@@ -46,7 +46,7 @@ class User:
         return result
 
     async def remove(self, uid):
-        result = await self.db.find_one_and_delete({'_id': ObjectId(uid)},projection={'user':True})
+        result = await self.db.find_one_and_delete({'_id': ObjectId(uid)}, projection={'user': True})
         if result is None:
             raise InvalidRequest('User does not exist')
         self.event.emit('user-remove', {
@@ -75,7 +75,7 @@ class User:
         result = await self.db.find_one({'_id': ObjectId(uid)})
         if result is None:
             raise InvalidRequest('User does not exist')
-        return result['settings']
+        return result.get('settings')
 
     async def set_settings(self, uid, settings):
         result = await self.db.find_one_and_update(

@@ -3,6 +3,7 @@ from .exception import InvalidRequest
 # Using Python's typing to help auto-completion and refactor
 from models import User
 
+
 ROLE_ADMIN = 'administrator'
 ROLE_EDITOR = 'editor'
 
@@ -100,4 +101,3 @@ handlers = {
     'user-set-role': (user_set_role, ('ajax-post', 'ws')),
     'user-set-password': (user_set_password, ('ajax-post',)),
 }
-
