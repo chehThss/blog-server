@@ -3,6 +3,7 @@ from .user import User
 from .post import Post
 from .event import Event
 from .file import Repo
+from .settings import Settings
 
 
 class Models:
@@ -14,10 +15,12 @@ class Models:
         self.user = User(self)
         self.file = Repo(self)
         self.post = Post(self)
+        self.settings = Settings(self)
 
     async def startup(self):
         await self.user.startup()
         await self.post.startup()
+        await self.settings.startup()
 
     async def shutdown(self):
         self.client.close()
