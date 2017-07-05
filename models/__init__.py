@@ -4,6 +4,7 @@ from .post import Post
 from .event import Event
 from .file import Repo
 from .settings import Settings
+from .post_categories import PostCategories
 
 
 class Models:
@@ -16,11 +17,13 @@ class Models:
         self.file = Repo(self)
         self.post = Post(self)
         self.settings = Settings(self)
+        self.post_categories = PostCategories(self)
 
     async def startup(self):
         await self.user.startup()
         await self.post.startup()
         await self.settings.startup()
+        await self.post_categories.startup()
 
     async def shutdown(self):
         self.client.close()

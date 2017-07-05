@@ -4,6 +4,10 @@ from bson import ObjectId
 from .event import Event
 
 
+ROLE_ADMIN = 'administrator'
+ROLE_EDITOR = 'editor'
+
+
 class User:
     def __init__(self, models):
         self.db: motor_asyncio.AsyncIOMotorCollection = models.db['user']
@@ -107,3 +111,9 @@ class User:
             {'$set': {'password': password}}
         ) is None:
             raise InvalidRequest('User does not exist')
+
+    async def is_administrator(self, uid):
+        if (await self.info(uid, projection={'role': True}))['role'] == ROLE_ADMIN:
+            return True
+        else:
+            return False

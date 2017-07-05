@@ -123,7 +123,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `value`
 
 - [x] `settings-get`: 返回所有键值对
-- [x] `settings-set`: 输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
+- [x] `settings-set`: 需要`administrator`权限，输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
 
 
 ## Log

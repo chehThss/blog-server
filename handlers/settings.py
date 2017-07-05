@@ -1,4 +1,6 @@
-from models import Settings
+from models import Settings, User
+from aiohttp_session import get_session
+from .exception import InvalidRequest
 
 
 async def settings_get(data, request):
@@ -7,6 +9,10 @@ async def settings_get(data, request):
 
 async def settings_set(data, request):
     settings: Settings = request.app.models.settings
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session or not (await user.is_administrator(session['uid'])):
+        raise InvalidRequest('Permission denied')
     return await settings.set(data)
 
 handlers = {
