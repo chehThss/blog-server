@@ -105,12 +105,23 @@ class User:
         if result is None:
             raise InvalidRequest('User does not exist')
 
-    async def set_password(self, uid, password):
-        if await self.db.find_one_and_update(
-            {'_id': ObjectId(uid)},
-            {'$set': {'password': password}}
-        ) is None:
+    async def update(self, uid, user, avatar, password):
+        user_pre = await self.db.find_one({'_id': ObjectId(uid)})
+        if user_pre is None:
             raise InvalidRequest('User does not exist')
+        if user is None:
+            user = user_pre.get('user')
+        if avatar is None:
+            avatar = user_pre.get('avatar')
+        if password is None:
+            password = user_pre.get('password')
+        await self.db.find_one_and_update(
+            {'_id': ObjectId(uid)},
+            {'$set': {
+                'user': user,
+                'avatar': avatar,
+                'password': password
+            }})
 
     async def is_administrator(self, uid):
         if (await self.info(uid, projection={'role': True}))['role'] == ROLE_ADMIN:

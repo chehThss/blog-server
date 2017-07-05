@@ -78,14 +78,19 @@ async def user_set_role(data, request):
         raise InvalidRequest('Permission denied')
     return await user.set_role(data['id'], data['role'])
 
+async def user_update(data, request):
+    user: User = request.app.models.user
+    session = await get_session(request)
+    if 'uid' not in session:
+        raise InvalidRequest('Login required')
+    await user.update(session['uid'], data.get('username'), data.get('avatar'), data.get('password'))
+
 async def user_set_password(data, request):
     user: User = request.app.models.user
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
-    if data['id'] != session['uid']:
-        raise InvalidRequest('Permission denied')
-    await user.set_password(data['id'], data['password'])
+    await user.update(session['uid'], None, None, data['password'])
     # TODO: sign out other devices
 
 handlers = {
@@ -99,5 +104,6 @@ handlers = {
     'user-get-settings': (user_get_settings, ('ajax-get',)),
     'user-set-settings': (user_set_settings, ('ajax-post',)),
     'user-set-role': (user_set_role, ('ajax-post', 'ws')),
+    'user-update': (user_update, ('ajax-post',)),
     'user-set-password': (user_set_password, ('ajax-post',)),
 }

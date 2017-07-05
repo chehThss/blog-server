@@ -63,7 +63,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `_id`: MongoDB 自带ID
 * `user`: 用户名
 * `password`: 密码
-* `avator`: 字符串类型，到头像的路径
+* `avatar`: 字符串类型，到头像的路径
 * `role`: 类型，现在可能包括`'administrator'`和`'editor'`两种
 * `settings`: JSON 字符串，客户端决定
 
@@ -74,6 +74,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `user-remove`: 支持`ajax-delete`和`ws`，输入为`id`，需要`'administrator'`权限，或者为`id`为用户本人
 - [x] `user-set-role`: 支持`ajax-post`和`ws`，输入为`id`和`role`，需要`'administrator'`权限
 - [x] `user-get-settings`: 支持`ajax-get`，返回当前用户的`settings`
+- [x] `user-update`: 支持`ajax-post`，输入为`username`、`avatar`和`password`（可选），更改非`None`项目
 - [x] `user-set-settings`: 支持`ajax-post`，输入为`settings`，设置当前用户的`settings`
 - [x] `user-set-password`: 支持`ajax-post`，输入为`id`和`password`，需要`id`为用户本人
 
