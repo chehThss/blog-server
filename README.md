@@ -105,7 +105,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `post-publish`：支持`ajax-post`，要求登录，提供除了`date`、`image`（暂时没做）、`excerpt`（暂时没做）的字段
 - [x] `post-unpublish`：支持`ajax-delete`，要求登录，输入为`id`
 - [x] `post-list`：支持`ajax-get`，无权限要求，返回所有`post`的`id`列表
-- [x] `post-update`：支持`ajax-post`，要求登录，提供`id`和除`date`以外的任意字段，并将`date`改为更改时间
+- [x] `post-update`：支持`ajax-post`，要求登录，可修改`title`, `path`, `categories`,`tags`,`image`,`excerpt`,`content`，修改后`date`自动更新
 - [x] `post-info`：支持`ajax-get`和`ws`，无权限要求，返回除`content`外的所有字段
 - [x] `post-search`：支持`ajax-get`，无权限要求，查找还很zz，返回包含查找关键词的`post`的`id`列表
 

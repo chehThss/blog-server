@@ -29,6 +29,8 @@ async def post_update(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
+    if 'id' not in data:
+        raise InvalidRequest('Post id required')
     if str((await post.info(data['id'], {'owner': True}))['owner']) != session['uid']:
         raise InvalidRequest('Permission denied')
     return await post.update(data)
