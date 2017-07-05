@@ -44,7 +44,7 @@ class App:
     async def shutdown(self):
         self.server.close()
         self.redis_pool.close()
-        await self.shutdown()
+        await self.app.models.shutdown()
         await self.server.wait_closed()
         await self.redis_pool.wait_closed()
         await self.app.shutdown()
