@@ -25,7 +25,7 @@ class User:
             'role': role
         })
         self.event.emit('user-add', {
-            'id': result.inserted_id,
+            'id': str(result.inserted_id),
             'user': username
         })
         return str(result.inserted_id)

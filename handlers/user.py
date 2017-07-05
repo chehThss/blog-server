@@ -95,9 +95,9 @@ handlers = {
     'logout': (logout, ('ajax-get', 'ws')),
     'check-session': (check_session, ('ajax-get', 'ws')),
     'user-list': (user_list, ('ajax-get', 'ws')),
-    'user-get-settings': (user_get_settings, ('ajax-get')),
-    'user-set-settings': (user_set_settings, ('ajax-post')),
+    'user-get-settings': (user_get_settings, ('ajax-get',)),
+    'user-set-settings': (user_set_settings, ('ajax-post',)),
     'user-set-role': (user_set_role, ('ajax-post', 'ws')),
-    'user-set-password': (user_set_password, ('ajax-post')),
+    'user-set-password': (user_set_password, ('ajax-post',)),
 }
 

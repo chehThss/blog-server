@@ -30,8 +30,7 @@ class App:
         ])
         for route in routes:
             self.app.router.add_route(*route[:3], name=route[3])
-        self.db_client = motor_asyncio.AsyncIOMotorClient(self.config['db'])
-        self.app.models = Models(self.db_client.get_default_database())
+        self.app.models = Models(self.config)
         await self.app.models.startup()
         self.app.websockets = []
         async def on_shutdown(_app):
@@ -44,8 +43,8 @@ class App:
 
     async def shutdown(self):
         self.server.close()
-        self.db_client.close()
         self.redis_pool.close()
+        await self.shutdown()
         await self.server.wait_closed()
         await self.redis_pool.wait_closed()
         await self.app.shutdown()
