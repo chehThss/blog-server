@@ -83,7 +83,14 @@ async def user_update(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
-    await user.update(session['uid'], data.get('username'), data.get('avatar'), data.get('password'))
+    avatar = data.get('avatar')
+    if avatar is not None:
+        file = request.app.models.file
+        f = avatar.file
+        avatar = '/site/avatar/' + session['uid'] + '.jpeg'
+        p = file.resolve(avatar)
+        file.move_file(f, p)
+    await user.update(session['uid'], data.get('username'), avatar, data.get('password'))
 
 async def user_set_password(data, request):
     user: User = request.app.models.user

@@ -121,7 +121,7 @@ class User:
             raise InvalidRequest('User does not exist')
 
     async def update(self, uid, user, avatar, password):
-        if uid == self.__root_id:
+        if uid == self.__root_id and user is not None:
             raise InvalidRequest('Permission denied')
         user_pre = await self.db.find_one({'_id': ObjectId(uid)})
         if user_pre is None:
