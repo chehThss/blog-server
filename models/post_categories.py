@@ -6,6 +6,7 @@ from bson import ObjectId
 class PostCategories:
     def __init__(self, models):
         self.db: motor_asyncio.AsyncIOMotorCollection = models.db['post_categories']
+        self.event = models.event
 
     async def startup(self):
         await self.db.find_one_and_update(
@@ -44,11 +45,13 @@ class PostCategories:
         return result
 
     async def remove_children(self, name):
-        children = (await self.db.find_one({'name': name})).get('children')
+        result = await self.db.find_one({'name': name})
+        children = result.get('children')
         if children is not None:
             for x in children:
                 await self.remove_children(x)
         await self.db.find_one_and_delete({'name': name})
+        self.event.emit("category-remove", {'id': result['id']})
 
     async def remove(self, name):
         if name == '$root':
@@ -65,6 +68,7 @@ class PostCategories:
             {'name': result['parent']},
             {'$pullAll': {'children': [name]}}
         )
+        self.event.emit("category-remove", {'id': result['id']})
 
     async def __check_change_name(self, name, new_name):
         if name == '$root':

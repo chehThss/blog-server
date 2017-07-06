@@ -22,7 +22,7 @@ async def post_unpublish(data, request):
 
 async def post_list(data, request):
     post: Post = request.app.models.post
-    return await post.list()
+    return await post.list(data.get('owner'), data.get('category'))
 
 async def post_update(data, request):
     post: Post = request.app.models.post

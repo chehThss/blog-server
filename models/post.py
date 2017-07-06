@@ -31,14 +31,22 @@ class Post:
         if await self._db.find_one_and_delete({'_id': ObjectId(pid)}) is None:
             raise InvalidRequest('Post does not exist')
 
-    async def list(self):
+    async def list(self, owner, category):
         result = []
-        async for record in self._db.find():
-            result.append(str(record['_id']))
+        if owner is None and category is None:
+            async for record in self._db.find():
+                result.append(str(record['_id']))
+            return result
+        if owner:
+            async for record in self._db.find({'owner': owner}):
+                result.append(str(record['_id']))
+        if category:
+            async for record in self._db.find({'categories': {'$in': [category]}}):
+                result.append(str(record['_id']))
         return result
 
     async def update(self, data):
-        ls = ["title", "path", "categories","tags","image","excerpt","content"]
+        ls = ["title", "path", "categories", "tags", "image", "excerpt", "content"]
         data_pre = await self._db.find_one({'_id': ObjectId(data['id'])})
         if data_pre is None:
             raise InvalidRequest('Post does not exist')

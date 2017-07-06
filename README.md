@@ -96,7 +96,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 * `owner`：所有者用户，字符串
 * `path`：文件路径，必须是所有者用户`public`目录下的文件
 * `date`：创建时间
-* `categories`: 字符串列表
+* `categories`: 字符串列表，存储`category`的`id`
 * `tags`：字符串列表
 * `image`：可选，题图路径
 * `excerpt`：可选，摘要
@@ -104,7 +104,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 
 - [x] `post-publish`：支持`ajax-post`，要求登录，提供除了`date`、`image`（暂时没做）、`excerpt`（暂时没做）的字段
 - [x] `post-unpublish`：支持`ajax-delete`，要求登录，输入为`id`
-- [x] `post-list`：支持`ajax-get`，无权限要求，返回所有`post`的`id`列表
+- [x] `post-list`：支持`ajax-get`，无权限要求，可对`owner`和`category`进行筛选，返回符合条件的`post`的`id`列表，若`owner`、`category`都为空，则返回所有`post`的`id`列表
 - [x] `post-update`：支持`ajax-post`，要求登录，可修改`title`, `path`, `categories`,`tags`,`image`,`excerpt`,`content`，修改后`date`自动更新
 - [x] `post-info`：支持`ajax-get`和`ws`，无权限要求，返回除`content`外的所有字段
 - [x] `post-search`：支持`ajax-get`，无权限要求，查找还很zz，返回包含查找关键词的`post`的`id`列表
@@ -126,6 +126,12 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 
 - [x] `settings-get`: 返回所有键值对，无权限要求
 - [x] `settings-set`: 需要`administrator`权限，输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
+
+####关联数据的处理 `RelatedDataHandlers`
+利用`event`机制处理相关数据的改变，包含：
+
+- [x] `remove_user_post`：当有`user`被删除时，其`post`也将被删除
+- [x] `remove_category_from_post`：当`category`被删除时，包含该`category_id`的`post`的`categories`内的相关`id`将被删除
 
 
 ## Log
