@@ -5,6 +5,7 @@ from .event import Event
 from .file import Repo
 from .settings import Settings
 from .post_categories import PostCategories
+from .related_data_handlers import RelatedDataHandlers
 
 
 class Models:
@@ -18,6 +19,7 @@ class Models:
         self.post = Post(self)
         self.settings = Settings(self)
         self.post_categories = PostCategories(self)
+        self.related_data_handlers = RelatedDataHandlers(self)
 
     async def startup(self):
         await self.user.startup()

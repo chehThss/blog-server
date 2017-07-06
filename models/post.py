@@ -46,7 +46,7 @@ class Post:
         return result
 
     async def update(self, data):
-        ls = ["title", "path", "categories","tags","image","excerpt","content"]
+        ls = ["title", "path", "categories", "tags", "image", "excerpt", "content"]
         data_pre = await self._db.find_one({'_id': ObjectId(data['id'])})
         if data_pre is None:
             raise InvalidRequest('Post does not exist')

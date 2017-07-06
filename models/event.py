@@ -10,6 +10,8 @@ class Event:
         handlers = self.events.get(name)
         if handlers is None:
             self.events[name] = [handler]
+        else:
+            self.events[name].append(handler)
         return handler
 
     def emit(self, name, *args, **kwargs):
