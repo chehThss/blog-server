@@ -2,8 +2,10 @@ from motor import motor_asyncio
 from handlers.exception import InvalidRequest
 from bson import ObjectId
 from .event import Event
+from pymongo import ReturnDocument
 
 
+ROLE_ROOT = 'root'
 ROLE_ADMIN = 'administrator'
 ROLE_EDITOR = 'editor'
 
@@ -12,12 +14,22 @@ class User:
     def __init__(self, models):
         self.db: motor_asyncio.AsyncIOMotorCollection = models.db['user']
         self.event: Event = models.event
+        self.__root_id = ''
 
     async def startup(self):
-        await self.db.find_one_and_update(
-            {'user': 'root'},
+        root = (await self.db.find_one_and_update(
+            {'user': ROLE_ROOT},
             {'$set': {'password': 'root', 'role': 'administrator'}},
-            upsert=True)
+            upsert=True
+        ))
+        if root is None:
+            self.__root_id = str((await self.db.find_one({'user': ROLE_ROOT}))['_id'])
+            self.event.emit('user-add', {
+                'id': self.__root_id,
+                'user': ROLE_ROOT
+            })
+        else:
+            self.__root_id = str(root.get('_id'))
         await self.db.create_index('user')
 
     async def add(self, username, password, role):
@@ -50,6 +62,8 @@ class User:
         return result
 
     async def remove(self, uid):
+        if uid == self.__root_id:
+            raise InvalidRequest('Root cannot be removed')
         result = await self.db.find_one_and_delete({'_id': ObjectId(uid)}, projection={'user': True})
         if result is None:
             raise InvalidRequest('User does not exist')
@@ -98,6 +112,8 @@ class User:
         return result['role']
 
     async def set_role(self, uid, role):
+        if uid == self.__root_id:
+            raise InvalidRequest('Permission denied')
         result = await self.db.find_one_and_update(
             {'_id': ObjectId(uid)},
             {'$set': {'role': role}}
@@ -106,6 +122,8 @@ class User:
             raise InvalidRequest('User does not exist')
 
     async def update(self, uid, user, avatar, password):
+        if uid == self.__root_id:
+            raise InvalidRequest('Permission denied')
         user_pre = await self.db.find_one({'_id': ObjectId(uid)})
         if user_pre is None:
             raise InvalidRequest('User does not exist')
