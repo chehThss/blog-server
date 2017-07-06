@@ -1,6 +1,6 @@
 from aiohttp_session import get_session
 from .exception import InvalidRequest
-from os import path, makedirs, listdir
+from os import path, makedirs
 from aiohttp import web
 from shutil import move
 
@@ -24,27 +24,21 @@ async def file_put(data, request):
             makedirs(file_path)
 
 async def file_get(data, request):
-    session = await get_session(request)
-    if 'uid' not in session:
-        raise InvalidRequest('Login required')
-    repo_path = path.join(request.app.config['upload-path'], session['uid'])
-    if not path.isdir(repo_path):
-        makedirs(repo_path)
-    file = data['file']
-    if file.startswith('/'):
-        file = '.' + file
-    file = path.join(request.app.config['upload-path'], session['uid'], file)
-    if path.isdir(file):
-        result = {}
-        for k in listdir(file):
-            if not k.startswith('.'):
-                result[k] = path.isdir(path.join(file, k))
-        return result
-    if not path.isfile(file):
-        raise web.HTTPNotFound
-    return web.FileResponse(file, chunk_size=256*1024)
+    file = request.app.models.file
+    mode = data.get('mode')
+    if mode == 'private':
+        session = await get_session(request)
+        if 'uid' not in session:
+            raise InvalidRequest('Login required')
+        user = request.app.models.user
+        user = (await user.info(session['uid'], projection={
+            '_id': False, 'user': True}))['user']
+        p = file.resolve(data['path'], user, mode)
+        return file.send(p, allow_dir=True)
+    else:
+        p = file.resolve(data['path'], mode=mode)
+        return file.send(p, allow_dir=(mode == 'share'))
 
 handlers = {
-    'file-put': (file_put, ('ajax-post',)),
-    'file-get': (file_get, ('ajax-get',))
+    'file-get': (file_get, ('file-get',))
 }
