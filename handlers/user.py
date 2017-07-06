@@ -2,6 +2,7 @@ from aiohttp_session import get_session
 from .exception import InvalidRequest
 # Using Python's typing to help auto-completion and refactor
 from models import User
+import asyncio
 
 
 ROLE_ADMIN = 'administrator'
@@ -16,6 +17,11 @@ async def user_info(data, request):
     user: User = request.app.models.user
     # TODO: check input
     return await user.info(data['id'])
+
+async def user_get_id(data, request):
+    user: User = request.app.models.user
+    # TODO: check input
+    return await user.get_id(data['username'])
 
 async def user_remove(data, request):
     user: User = request.app.models.user
@@ -93,9 +99,31 @@ async def user_set_password(data, request):
     await user.update(session['uid'], None, None, data['password'])
     # TODO: sign out other devices
 
+
+async def user_info_subscribe(data, request, session):
+    fu = asyncio.Future()
+    async def func(user_parameter):
+        sess = await get_session(request)
+        if not sess.get('uid'):
+            fu.set_exception(InvalidRequest("Login required"))
+        if await request.app.models.user.is_administrator(sess['uid']):
+            session.send(user_parameter['id'])
+        elif sess['uid'] == user_parameter['id']:
+            session.send(user_parameter['id'])
+    request.app.models.event.add_event_listener("user-add", func)
+    request.app.models.event.add_event_listener("user-remove", func)
+    request.app.models.event.add_event_listener("user-update", func)
+    try:
+        await fu
+    finally:
+        request.app.models.event.remove_event_listener("user-add", func)
+        request.app.models.event.remove_event_listener("user-remove", func)
+        request.app.models.event.remove_event_listener("user-update", func)
+
 handlers = {
     'user-add': (user_add, ('ajax-post', 'ws')),
     'user-info': (user_info, ('ajax-get', 'ws')),
+    'user-get-id': (user_get_id, ('ajax-get', 'ws')),
     'user-remove': (user_remove, ('ajax-delete', 'ws')),
     'login': (login, ('ajax-post', 'ws')),
     'logout': (logout, ('ajax-get', 'ws')),
@@ -106,4 +134,5 @@ handlers = {
     'user-set-role': (user_set_role, ('ajax-post', 'ws')),
     'user-update': (user_update, ('ajax-post',)),
     'user-set-password': (user_set_password, ('ajax-post',)),
+    'user-info-subscribe': (user_info_subscribe, ('ws',)),
 }

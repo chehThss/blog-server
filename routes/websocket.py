@@ -5,6 +5,7 @@ from inspect import signature
 from typing import Dict, Tuple, Callable, Any
 from aiohttp import web, WSMsgType, WSCloseCode
 from handlers import handlers, InvalidRequest, Session
+from aiohttp_session import get_session
 
 global_handlers: Dict[str, Callable] = {}
 for n, (h, p) in handlers.items():
@@ -88,8 +89,14 @@ async def websocket_handler(request):
     client = Client(request)
     ws = await client.startup()
     request.app.websockets.append(client)
+    async def func(user_parameter):
+        sess = await get_session(request)
+        if sess.get('uid') == user_parameter['id']:
+            sess.pop('uid')
+    request.app.models.event.add_event_listener("user-remove", func)
     try:
         await client.run()
     finally:
         request.app.websockets.remove(client)
+        request.app.models.event.remove_event_listener("user-remove", func)
     return ws

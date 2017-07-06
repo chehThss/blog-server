@@ -60,6 +60,12 @@ class User:
             result['_id'] = str(result['_id'])
         return result
 
+    async def get_id(self, username):
+        result = await self.db.find_one({'user': username})
+        if result:
+            return str(result['_id'])
+        raise InvalidRequest('User does not exist')
+
     async def remove(self, uid):
         if uid == self.__root_id:
             raise InvalidRequest('Root cannot be removed')
@@ -101,6 +107,10 @@ class User:
         )
         if result is None:
             raise InvalidRequest('User does not exist')
+        self.event.emit('user-update', {
+            'id': uid,
+            'user': result['user']
+        })
 
     async def role(self, uid):
         result = await self.db.find_one({'_id': ObjectId(uid)}, projection={
@@ -119,6 +129,10 @@ class User:
         )
         if result is None:
             raise InvalidRequest('User does not exist')
+        self.event.emit('user-update', {
+            'id': uid,
+            'user': result['user']
+        })
 
     async def update(self, uid, user, avatar, password):
         if uid == self.__root_id:
@@ -139,6 +153,10 @@ class User:
                 'avatar': avatar,
                 'password': password
             }})
+        self.event.emit('user-update', {
+            'id': uid,
+            'user': user
+        })
 
     async def is_administrator(self, uid):
         if (await self.info(uid, projection={'role': True}))['role'] == ROLE_ADMIN:
