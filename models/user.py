@@ -2,7 +2,6 @@ from motor import motor_asyncio
 from handlers.exception import InvalidRequest
 from bson import ObjectId
 from .event import Event
-from pymongo import ReturnDocument
 
 
 ROLE_ROOT = 'root'
@@ -24,12 +23,12 @@ class User:
         ))
         if root is None:
             self.__root_id = str((await self.db.find_one({'user': ROLE_ROOT}))['_id'])
-            self.event.emit('user-add', {
-                'id': self.__root_id,
-                'user': ROLE_ROOT
-            })
         else:
             self.__root_id = str(root.get('_id'))
+        self.event.emit('user-add', {
+            'id': self.__root_id,
+            'user': 'root'
+        })
         await self.db.create_index('user')
 
     async def add(self, username, password, role):

@@ -10,7 +10,7 @@ class Repo:
         self.event.on('user-remove', self.del_for_user)
 
     async def init_for_user(self, user):
-        makedirs(path.join(self.upload_path, user['id']))
+        makedirs(path.join(self.upload_path, user['id']), exist_ok=True)
 
     async def del_for_user(self, user):
         rmtree(path.join(self.upload_path, user['id']))
