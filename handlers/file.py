@@ -30,10 +30,7 @@ async def file_get(data, request):
         session = await get_session(request)
         if 'uid' not in session:
             raise InvalidRequest('Login required')
-        user = request.app.models.user
-        user = (await user.info(session['uid'], projection={
-            '_id': False, 'user': True}))['user']
-        p = file.resolve(data['path'], user, mode)
+        p = file.resolve(data['path'], session['uid'], mode)
         return file.send(p, allow_dir=True)
     else:
         p = file.resolve(data['path'], mode=mode)

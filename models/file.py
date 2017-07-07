@@ -33,7 +33,7 @@ class Repo:
             if user is None:
                 raise InvalidRequest('Login required')
             else:
-                return path.join(self.upload_path, user, *pathes)
+                return path.join(self.upload_path, 'private', user,*pathes)
         elif mode == 'site' or mode == 'share':
             return path.join(self.upload_path, mode, *pathes)
         else:
