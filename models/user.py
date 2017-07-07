@@ -62,9 +62,9 @@ class User:
 
     async def get_id(self, username):
         result = await self.db.find_one({'user': username})
-        if result:
-            return str(result['_id'])
-        raise InvalidRequest('User does not exist')
+        if result is None:
+            raise InvalidRequest('User does not exist')
+        return str(result['_id'])
 
     async def remove(self, uid):
         if uid == self.__root_id:

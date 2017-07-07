@@ -78,7 +78,8 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `user-update`: 支持`ajax-post`，输入为`username`、`avatar`和`password`（可选），更改非`None`项目
 - [x] `user-set-settings`: 支持`ajax-post`，输入为`settings`，设置当前用户的`settings`
 - [x] `user-set-password`: 支持`ajax-post`，输入为`id`和`password`，需要`id`为用户本人
-- [x] `user-info-subscribe`：支持`ws`，输入为`id`（默认为当前用户），通知`id`对应用户的更新，传输为{`id`: 操作}，用户被删除时结束`action`
+- [x] `user-info-subscribe`：支持`ws`，输入为`id`（默认为当前用户），通知`id`对应用户的更新，
+                             传输为{`id`: 操作}，用户被删除时结束`action`
 - [x] `user-list-subscribe`：支持`ws`，需要管理员权限，通知所有用户的更新，传输为{`id`: 操作}
 
 回话的登入登出：
@@ -107,23 +108,29 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 
 - [x] `post-publish`：支持`ajax-post`，要求登录，提供除了`date`、`image`（暂时没做）、`excerpt`（暂时没做）的字段
 - [x] `post-unpublish`：支持`ajax-delete`，要求登录，输入为`id`
-- [x] `post-list`：支持`ajax-get`，无权限要求，可对`owner`和`category`进行筛选，返回符合条件的`post`的`id`列表，若`owner`、`category`都为空，则返回所有`post`的`id`列表
-- [x] `post-update`：支持`ajax-post`，要求登录，可修改`title`, `path`, `categories`,`tags`,`image`,`excerpt`,`content`，修改后`date`自动更新
+- [x] `post-list`：支持`ajax-get`，无权限要求，可对`owner`和`category`进行筛选，返回符合条件的`post`的`id`列表，
+                   若`owner`、`category`都为空，则返回所有`post`的`id`列表
+- [x] `post-update`：支持`ajax-post`，要求登录，可修改`title`, `path`, `categories`,`tags`,`image`,`excerpt`,`content`，
+                     修改后`date`自动更新
 - [x] `post-info`：支持`ajax-get`和`ws`，无权限要求，返回除`content`外的所有字段
 - [x] `post-search`：支持`ajax-get`，无权限要求，查找还很zz，返回包含查找关键词的`post`的`id`列表
-- [x] `post-info-subscribe`：支持`ws`，输入为`id`，返回`post`的更新，格式为{`id`: 操作}，`post`被删除时结束`action`
-- [x] `post-list-subscribe`：支持`ws`，返回所有`post`的更新，格式为{`id`: 操作}
+- [x] `post-info-subscribe`：支持`ws`，输入为`id`，传输`post`的更新，格式为{`id`: 操作}，`post`被删除时结束`action`
+- [x] `post-list-subscribe`：支持`ws`，传输所有`post`的更新，格式为{`id`: 操作}
 
 数据库`post_categories`中包含以下字段，有个特殊的元素叫做`$root`
-* `name`
-* `parent`
-* `children`
+* `_id`
+* `name`：名字，唯一的
+* `parent`：父母的`id`
+* `children`：孩子的`id`
 
 - [x] `category-add`：支持`ajax-post`，需要`administrator`权限，输入`name`和`parent`
-- [x] `category-remove`：支持`ajax-delete`，需要`administrator`权限，输入`name`
-- [x] `category-update`：支持`ajax-post`，需要`administrator`权限，输入`name`、`rename`和`parent`（后两者可为空）
-- [x] `category-get`：支持`ajax-get`，无权限要求，输入为`name`，返回所有字段（包括`id`）
-- [x] `category-info`：支持`ajax-get`，无权限要求，输入为`id`，返回所有字段（包括`id`）
+- [x] `category-remove`：支持`ajax-delete`，需要`administrator`权限，输入`id`
+- [x] `category-update`：支持`ajax-post`，需要`administrator`权限，输入`id`、`name`和`parent`（后两者可为空）
+- [x] `category-get-id`：支持`ajax-get`，无权限要求，输入为`name`，返回`id`
+- [x] `category-info`：支持`ajax-get`，无权限要求，输入为`id`，返回除`id`以外所有字段
+- [x] `category-list-subscribe`：支持`ws`，传输所有`category`的更新，格式为{`id`: 操作}
+- [x] `category-info-subscribe`：支持`ws`，输入为`id`，传输所有`id`对应`category`的更新，格式为{`id`: 操作}，
+                                `category`被删除时结束`action`
 
 `settings`中包含一下字段：
 * `key`

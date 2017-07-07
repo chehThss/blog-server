@@ -4,6 +4,7 @@ from motor import motor_asyncio
 class Settings:
     def __init__(self, models):
         self.db: motor_asyncio.AsyncIOMotorCollection = models.db['settings']
+        self.event = models.event
 
     async def startup(self):
         await self.db.create_index('key')
@@ -21,3 +22,7 @@ class Settings:
                 {'$set': {'value': data[x]}},
                 upsert=True
             )
+            self.event.emit('settings-update', {
+                'key': x,
+                'value': data[x]
+            })

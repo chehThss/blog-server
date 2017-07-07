@@ -30,6 +30,7 @@ class Post:
         self.event.emit('post-add', {
             'id': str(result.inserted_id)
         })
+        return str(result.inserted_id)
 
     async def unpublish(self, pid):
         if await self._db.find_one_and_delete({'_id': ObjectId(pid)}) is None:
@@ -100,3 +101,8 @@ class Post:
         async for record in self._db.find({'$text': {'$search': content}}):
             result.append(str(record['_id']))
         return result
+
+    async def exist(self, pid):
+        if await self._db.find_one({'_id': pid}) is None:
+            return False
+        return True

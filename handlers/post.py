@@ -10,7 +10,7 @@ async def post_publish(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
-    await post.publish(data.get('title'), session['uid'], data['path'], data.get('categories'),\
+    return await post.publish(data.get('title'), session['uid'], data['path'], data.get('categories'),\
                        data.get('tags'), data.get('content'), data.get('image'), data.get('excerpt'))
 
 async def post_unpublish(data, request):
@@ -46,14 +46,15 @@ async def post_search(data, request):
     return await post.search(data['content'])
 
 async def post_info_subscribe(data, request, session):
-    if 'id' not in data:
-        raise InvalidRequest('Post id required')
+    if 'id' not in data or not (await request.app.models.post.exist(data['id'])):
+        raise InvalidRequest('Post does not exist')
     fu = asyncio.Future()
     async def send_update(post_parameter):
         if data['id'] == post_parameter['id']:
             session.send({data['id']: 'update'})
     async def send_remove(post_parameter):
         if data['id'] == post_parameter['id']:
+            session.send({post_parameter['id']: 'remove'})
             fu.set_exception(InvalidRequest("Post removed"))
     request.app.models.event.add_event_listener('post-update', send_update)
     request.app.models.event.add_event_listener('post-remove', send_remove)

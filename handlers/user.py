@@ -119,6 +119,7 @@ async def user_info_subscribe(data, request, session):
             session.send({user_parameter['id']: "update"})
     async def send_remove(user_parameter):
         if user_parameter['id'] == uid:
+            session.send({uid: 'remove'})
             fu.set_exception(InvalidRequest("User removed"))
     request.app.models.event.add_event_listener("user-update", send_update)
     request.app.models.event.add_event_listener("user-remove", send_remove)
