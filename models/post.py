@@ -8,6 +8,7 @@ from bson import ObjectId
 class Post:
     def __init__(self, models):
         self._db: motor_asyncio.AsyncIOMotorCollection = models.db['post']
+        self.event = models.event
 
     async def startup(self):
         index_date = IndexModel([('date', DESCENDING)])
@@ -15,7 +16,7 @@ class Post:
         await self._db.create_indexes([index_date, index_text])
 
     async def publish(self, title, owner, path, categories, tags, content, image=None, excerpt=None):
-        await self._db.insert_one({
+        result = await self._db.insert_one({
             'title': title,
             'owner': owner,
             'path': path,
@@ -26,10 +27,16 @@ class Post:
             'excerpt': excerpt,
             'content': content
         })
+        self.event.emit('post-add', {
+            'id': str(result.inserted_id)
+        })
 
     async def unpublish(self, pid):
         if await self._db.find_one_and_delete({'_id': ObjectId(pid)}) is None:
             raise InvalidRequest('Post does not exist')
+        self.event.emit('post-remove', {
+            'id': pid
+        })
 
     async def list(self, owner, category):
         result = []
@@ -64,6 +71,9 @@ class Post:
             'excerpt': data_pre['excerpt'],
             'content': data_pre['content']
         }})
+        self.event.emit('post-update', {
+            'id': data['id']
+        })
 
     async def info(self, pid, projection=None):
         if projection is None:

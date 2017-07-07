@@ -163,3 +163,9 @@ class User:
             return True
         else:
             return False
+
+    async def exist(self, uid):
+        if (await self.db.find_one({"_id": ObjectId(uid)})) is None:
+            return False
+        else:
+            return True

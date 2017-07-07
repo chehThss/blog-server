@@ -78,7 +78,8 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `user-update`: 支持`ajax-post`，输入为`username`、`avatar`和`password`（可选），更改非`None`项目
 - [x] `user-set-settings`: 支持`ajax-post`，输入为`settings`，设置当前用户的`settings`
 - [x] `user-set-password`: 支持`ajax-post`，输入为`id`和`password`，需要`id`为用户本人
-- [x] `user-info-subscribe`：支持`ws`，传输权限范围内对象的更新（`administrator`为全部`user`，`editor`为自己）
+- [x] `user-info-subscribe`：支持`ws`，输入为`id`（默认为当前用户），通知`id`对应用户的更新，传输为{`id`: 操作}，用户被删除时结束`action`
+- [x] `user-list-subscribe`：支持`ws`，需要管理员权限，通知所有用户的更新，传输为{`id`: 操作}
 
 回话的登入登出：
 - [x] `login`: 支持`ajax-post`和`ws`，输入为用户名密码 
@@ -110,6 +111,8 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `post-update`：支持`ajax-post`，要求登录，可修改`title`, `path`, `categories`,`tags`,`image`,`excerpt`,`content`，修改后`date`自动更新
 - [x] `post-info`：支持`ajax-get`和`ws`，无权限要求，返回除`content`外的所有字段
 - [x] `post-search`：支持`ajax-get`，无权限要求，查找还很zz，返回包含查找关键词的`post`的`id`列表
+- [x] `post-info-subscribe`：支持`ws`，输入为`id`，返回`post`的更新，格式为{`id`: 操作}，`post`被删除时结束`action`
+- [x] `post-list-subscribe`：支持`ws`，返回所有`post`的更新，格式为{`id`: 操作}
 
 数据库`post_categories`中包含以下字段，有个特殊的元素叫做`$root`
 * `name`
@@ -129,7 +132,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `settings-get`: 返回所有键值对，无权限要求
 - [x] `settings-set`: 需要`administrator`权限，输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
 
-####关联数据的处理 `RelatedDataHandlers`
+#### 关联数据的处理 `RelatedDataHandlers`
 利用`event`机制处理相关数据的改变，包含：
 
 - [x] `remove_user_post`：当有`user`被删除时，其`post`也将被删除

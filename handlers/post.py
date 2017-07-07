@@ -2,6 +2,8 @@ from aiohttp_session import get_session
 from .exception import InvalidRequest
 # Using Python's typing to help auto-completion and refactor
 from models import Post
+import asyncio
+
 
 async def post_publish(data, request):
     post: Post = request.app.models.post
@@ -43,11 +45,49 @@ async def post_search(data, request):
     post: Post = request.app.models.post
     return await post.search(data['content'])
 
+async def post_info_subscribe(data, request, session):
+    if 'id' not in data:
+        raise InvalidRequest('Post id required')
+    fu = asyncio.Future()
+    async def send_update(post_parameter):
+        if data['id'] == post_parameter['id']:
+            session.send({data['id']: 'update'})
+    async def send_remove(post_parameter):
+        if data['id'] == post_parameter['id']:
+            fu.set_exception(InvalidRequest("Post removed"))
+    request.app.models.event.add_event_listener('post-update', send_update)
+    request.app.models.event.add_event_listener('post-remove', send_remove)
+    try:
+        await fu
+    finally:
+        request.app.models.event.remove_event_listener('post-update', send_update)
+        request.app.models.event.remove_event_listener('post-remove', send_remove)
+
+async def post_list_subscribe(data, request, session):
+    fu = asyncio.Future()
+    async def send_add(post_parameter):
+        session.send({post_parameter['id']: 'add'})
+    async def send_update(post_parameter):
+        session.send({post_parameter['id']: 'update'})
+    async def send_remove(post_parameter):
+        session.send({post_parameter['id']: 'remove'})
+    request.app.models.event.add_event_listener('post-add', send_add)
+    request.app.models.event.add_event_listener('post-update', send_update)
+    request.app.models.event.add_event_listener('post-remove', send_remove)
+    try:
+        await fu
+    finally:
+        request.app.models.event.remove_event_listener('post-add', send_add)
+        request.app.models.event.remove_event_listener('post-update', send_update)
+        request.app.models.event.remove_event_listener('post-remove', send_remove)
+
 handlers = {
     'post-publish': (post_publish, ('ajax-post',)),
     'post-unpublish': (post_unpublish, ('ajax-delete',)),
     'post-list': (post_list, ('ajax-get',)),
     'post-update': (post_update, ('ajax-post',)),
     'post-info': (post_info, ('ajax-get', 'ws')),
-    'post-search': (post_search, ('ajax-get',))
+    'post-search': (post_search, ('ajax-get',)),
+    'post-info-subscribe': (post_info_subscribe, ('ws',)),
+    'post-list-subscribe': (post_list_subscribe, ('ws',)),
 }

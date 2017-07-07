@@ -106,26 +106,59 @@ async def user_set_password(data, request):
     await user.update(session['uid'], None, None, data['password'])
     # TODO: sign out other devices
 
-
 async def user_info_subscribe(data, request, session):
     fu = asyncio.Future()
-    async def func(user_parameter):
+    uid = data.get('id')
+    if uid is None:
         sess = await get_session(request)
-        if not sess.get('uid'):
-            fu.set_exception(InvalidRequest("Login required"))
-        if await request.app.models.user.is_administrator(sess['uid']):
-            session.send(user_parameter['id'])
-        elif sess['uid'] == user_parameter['id']:
-            session.send(user_parameter['id'])
-    request.app.models.event.add_event_listener("user-add", func)
-    request.app.models.event.add_event_listener("user-remove", func)
-    request.app.models.event.add_event_listener("user-update", func)
+        uid = sess['uid']
+    if not (await request.app.models.user.exist(uid)):
+        raise InvalidRequest('User does not exist')
+    async def send_update(user_parameter):
+        if user_parameter['id'] == uid:
+            session.send({user_parameter['id']: "update"})
+    async def send_remove(user_parameter):
+        if user_parameter['id'] == uid:
+            fu.set_exception(InvalidRequest("User removed"))
+    request.app.models.event.add_event_listener("user-update", send_update)
+    request.app.models.event.add_event_listener("user-remove", send_remove)
     try:
         await fu
     finally:
-        request.app.models.event.remove_event_listener("user-add", func)
-        request.app.models.event.remove_event_listener("user-remove", func)
-        request.app.models.event.remove_event_listener("user-update", func)
+        request.app.models.event.remove_event_listener("user-update", send_update)
+        request.app.models.event.remove_event_listener("user-remove", send_remove)
+
+
+async def user_list_subscribe(data, request, session):
+    fu = asyncio.Future()
+    async def check_identity():
+        sess = await get_session(request)
+        if not sess.get('uid'):
+            fu.set_exception(InvalidRequest("Login required"))
+            return False
+        if not await request.app.models.user.is_administrator(sess['uid']):
+            fu.set_exception(InvalidRequest("Permission denied"))
+            return False
+        return True
+    async def send_add(user_parameter):
+        if await check_identity():
+            session.send({user_parameter['id']: "add"})
+    async def send_update(user_parameter):
+        if await check_identity():
+            session.send({user_parameter['id']: "update"})
+    async def send_remove(user_parameter):
+        if await check_identity():
+            session.send({user_parameter['id']: "remove"})
+    request.app.models.event.add_event_listener("user-add", send_add)
+    request.app.models.event.add_event_listener("user-remove", send_remove)
+    request.app.models.event.add_event_listener("user-update", send_update)
+    await check_identity()
+    try:
+        await fu
+    finally:
+        request.app.models.event.remove_event_listener("user-add", send_add)
+        request.app.models.event.remove_event_listener("user-remove", send_remove)
+        request.app.models.event.remove_event_listener("user-update", send_update)
 
 handlers = {
     'user-add': (user_add, ('ajax-post', 'ws')),
@@ -142,4 +175,5 @@ handlers = {
     'user-update': (user_update, ('ajax-post',)),
     'user-set-password': (user_set_password, ('ajax-post',)),
     'user-info-subscribe': (user_info_subscribe, ('ws',)),
+    'user-list-subscribe': (user_list_subscribe, ('ws',)),
 }
