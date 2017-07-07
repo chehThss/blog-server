@@ -2,6 +2,7 @@ from motor import motor_asyncio
 from handlers.exception import InvalidRequest
 from bson import ObjectId
 from .event import Event
+import bcrypt
 
 
 ROLE_ROOT = 'root'
@@ -16,15 +17,19 @@ class User:
         self.__root_id = ''
 
     async def startup(self):
-        root = (await self.db.find_one_and_update(
-            {'user': ROLE_ROOT},
-            {'$set': {'password': 'root', 'role': 'administrator'}},
-            upsert=True
-        ))
+        password = 'root'
+        password = password.encode('utf-8')
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+        root = await self.db.find_one({'user': ROLE_ROOT})
         if root is None:
-            self.__root_id = str((await self.db.find_one({'user': ROLE_ROOT}))['_id'])
+            root = await self.db.insert_one({
+                'user': ROLE_ROOT,
+                'password': hashed,
+                'role': 'administrator',
+            })
+            self.__root_id = str(root.inserted_id)
         else:
-            self.__root_id = str(root.get('_id'))
+            self.__root_id = str(root['_id'])
         self.event.emit('user-add', {
             'id': self.__root_id,
             'user': 'root'
@@ -34,9 +39,11 @@ class User:
     async def add(self, username, password, role):
         if await self.db.find_one({'user': username}) is not None:
             raise InvalidRequest('User already exists')
+        password = password.encode('utf-8')
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         result = await self.db.insert_one({
             'user': username,
-            'password': password,
+            'password': hashed,
             'role': role
         })
         self.event.emit('user-add', {
@@ -77,14 +84,15 @@ class User:
             'user': result['user']
         })
 
-    async def check_user(self, username, psw):
+    async def check_user(self, username, password):
         result = await self.db.find_one({'user': username}, projection={
             'password': True,
             '_id': True
         })
         if result is None:
             raise InvalidRequest('User does not exist')
-        if result['password'] != psw:
+        password = password.encode('utf-8')
+        if not bcrypt.checkpw(password, result['password']):
             raise InvalidRequest('Wrong password')
         return str(result['_id'])
 
@@ -145,14 +153,17 @@ class User:
         if avatar is None:
             avatar = user_pre.get('avatar')
         if password is None:
-            password = user_pre.get('password')
+            hashed = user_pre.get('password')
+        else:
+            password = password.encode('utf-8')
+            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         await self.db.find_one_and_update(
             {'_id': ObjectId(uid)},
             {'$set': {
                 'user': user,
-                'avatar': avatar,
-                'password': password
-            }})
+                'password': hashed,
+                ** ({'avatar': avatar} if avatar is not None else {})
+        }})
         self.event.emit('user-update', {
             'id': uid,
             'user': user
