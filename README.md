@@ -138,6 +138,7 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 
 - [x] `settings-get`: 返回所有键值对，无权限要求
 - [x] `settings-set`: 需要`administrator`权限，输入为若干键值对，若`key`不存在则创建新纪录，存在则更新`value`
+- [x] `settings-subscribe`：支持`ws`，传输所有键值对的更新，格式为{`key`: `value`}
 
 #### 关联数据的处理 `RelatedDataHandlers`
 利用`event`机制处理相关数据的改变，包含：
