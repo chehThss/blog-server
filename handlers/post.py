@@ -10,8 +10,8 @@ async def post_publish(data, request):
     session = await get_session(request)
     if 'uid' not in session:
         raise InvalidRequest('Login required')
-    return await post.publish(data.get('title'), session['uid'], data['path'], data.get('categories'),\
-                       data.get('tags'), data.get('content'), data.get('image'), data.get('excerpt'))
+    data['absolute_path'] = request.app.models.file.resolve(data['path'], session['uid'])
+    return await post.publish(data)
 
 async def post_unpublish(data, request):
     post: Post = request.app.models.post
@@ -35,6 +35,8 @@ async def post_update(data, request):
         raise InvalidRequest('Post id required')
     if str((await post.info(data['id'], {'owner': True}))['owner']) != session['uid']:
         raise InvalidRequest('Permission denied')
+    if 'path' in data:
+        data['absolute_path'] = request.app.models.file.resolve(data['path'], session['uid'])
     return await post.update(data)
 
 async def post_info(data, request):

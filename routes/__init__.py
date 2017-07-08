@@ -6,5 +6,5 @@ from .file import file_handler
 routes: List[Tuple[str, str, Callable, str]] = [
     ('GET', '/ws', websocket_handler, 'ws'),
     ('*', '/api/{action}', ajax_handler, 'ajax'),
-    ('*', r'/file{path:/.*}', file_handler, 'file')
+    ('*', r'/file{path:/.*|}', file_handler, 'file')
 ]

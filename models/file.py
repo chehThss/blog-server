@@ -21,7 +21,8 @@ class Repo:
         rmtree(path.join(self.upload_path, 'private', user['id']), ignore_errors=True)
 
     def resolve(self, p, user=None, mode=None):
-        pathes = [i for i in p.split('/') if i]
+        # Remove /file
+        pathes = [i for i in p.split('/') if i][1:]
         if mode is None:
             if len(pathes) == 0:
                 raise InvalidRequest('Not found')

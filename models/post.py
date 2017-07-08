@@ -16,17 +16,18 @@ class Post:
         index_text = IndexModel([('content', TEXT)])
         await self._db.create_indexes([index_date, index_text])
 
-    async def publish(self, title, owner, path, categories, tags, content, image=None, excerpt=None):
+    async def publish(self, data):
         result = await self._db.insert_one({
-            'title': title,
-            'owner': owner,
-            'path': path,
+            'title': data['title'],
+            'owner': data['owner'],
+            'path': data['path'],
+            'absolute_path': data['absolute_path'],
             'date': time(),
-            'categories': categories,
-            'tags': tags,
-            'image': image,
-            'excerpt': excerpt,
-            'content': content
+            'categories': data.get('categories'),
+            'tags': data.get('tags'),
+            'image': data.get('image'),
+            'excerpt': data.get('excerpt'),
+            'content': data.get('content')
         })
         self.event.emit('post-add', {
             'id': str(result.inserted_id)
@@ -55,7 +56,7 @@ class Post:
         return result
 
     async def update(self, data):
-        ls = ["title", "path", "categories", "tags", "image", "excerpt", "content"]
+        ls = ['title', 'path', 'absolute_path', 'categories', 'tags', 'image', 'excerpt', 'content']
         data_pre = await self._db.find_one({'_id': ObjectId(data['id'])})
         if data_pre is None:
             raise InvalidRequest('Post does not exist')
@@ -66,6 +67,7 @@ class Post:
         await self._db.find_one_and_update({'_id': ObjectId(data['id'])}, {'$set': {
             'title': data_pre['title'],
             'path': data_pre['path'],
+            'absolute_path': data_pre['absolute_path'],
             'date': time(),
             'categories': data_pre['categories'],
             'tags': data_pre['tags'],
@@ -113,6 +115,6 @@ class Post:
         pattern = re.compile('^' + re.escape(path))
         regex = Regex.from_native(pattern)
         regex.flags ^= re.UNICODE
-        async for record in self._db.find({'path': {'$regex': regex}}):
+        async for record in self._db.find({'absolute_path': {'$regex': regex}}):
             result.append(str(record['_id']))
         return result

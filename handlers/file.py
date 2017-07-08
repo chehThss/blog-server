@@ -49,7 +49,10 @@ async def file_delete(data, request):
         rmtree(p, ignore_errors=True)
     else:
         raise InvalidRequest('Not found')
-
+    post_removed_list = await request.app.models.post.find_files_in_directory(p)
+    if post_removed_list is not None:
+        for pid in post_removed_list:
+            await request.app.models.post.unpublish(pid)
 
 handlers = {
     'file-get': (file_get, ('file-get',)),

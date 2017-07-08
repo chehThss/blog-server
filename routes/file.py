@@ -15,7 +15,7 @@ for n, (h, p) in handlers.items():
             global_handlers[method] = h
 
 async def file_handler(request: web.Request):
-    path = request.match_info.get('path')
+    path = '/file' + request.match_info.get('path')
     data = await parse(request, global_handlers.keys())
     data['path'] = path
     handler = global_handlers[request.method]
