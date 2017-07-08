@@ -28,7 +28,7 @@ class Repo:
             if pathes[0] == 'site' or pathes[0] == 'share':
                 return path.join(self.upload_path, *pathes)
             else:
-                return path.join(self.upload_path, pathes[0], 'public', *pathes)
+                return path.join(self.upload_path, 'private', pathes[0], 'public', *pathes[1:])
         elif mode == 'private':
             if user is None:
                 raise InvalidRequest('Login required')
