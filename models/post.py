@@ -2,7 +2,8 @@ from motor import motor_asyncio
 from pymongo import IndexModel, TEXT, DESCENDING
 from time import time
 from handlers.exception import InvalidRequest
-from bson import ObjectId
+from bson import ObjectId, Regex
+import re
 
 
 class Post:
@@ -106,3 +107,12 @@ class Post:
         if await self._db.find_one({'_id': pid}) is None:
             return False
         return True
+
+    async def find_files_in_directory(self, path):
+        result = []
+        pattern = re.compile('^' + re.escape(path))
+        regex = Regex.from_native(pattern)
+        regex.flags ^= re.UNICODE
+        async for record in self._db.find({'path': {'$regex': regex}}):
+            result.append(str(record['_id']))
+        return result
