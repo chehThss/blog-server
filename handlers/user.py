@@ -96,6 +96,7 @@ async def user_update(data, request):
         avatar = '/site/avatar/' + session['uid'] + '.jpeg'
         p = file.resolve(avatar)
         file.move_file(f, p)
+        avatar = '/file' + avatar
     await user.update(session['uid'], data.get('username'), avatar, data.get('password'))
 
 async def user_set_password(data, request):
