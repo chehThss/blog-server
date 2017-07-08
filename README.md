@@ -86,12 +86,14 @@ AJAX 的路由路径为 `/api/{action}`，其中有状态的必须不能是`POST
 - [x] `login`: 支持`ajax-post`和`ws`，输入为用户名密码 
 - [x] `logout`: 支持`ajax-get`和`ws`
 
-## Content（Post，Static Files） 
+## Content（Post，Static Files）
+文件管理总共有 3 种，`site`是只能服务端写入，能被一切人读取（如存放头像），`share`是能被所有注册用户写入，
+能被所有人读取，`private`是所有用户各自有的，只能被自己读取访问（除`public`）
 首先是底层内容的管理。每个用户包含独立的目录，其中子目录`public`下为共享内容，可被外界访问。
 
-- [x] `file-put`：支持`ajax-post`，要求登录，提供`path`和可选的`file`和`name`参数。
-- [x] `file-get`：支持`ajax-get`，要求登录，提供`file`参数
-- [ ] `file-remove`：支持`ajax-delete`，要求登录，提供`file`参数
+- [x] `file-put`：支持`file-post`，要求登录，提供可选的`mode`（默认private）和可选的`type`参数和可选的`name`参数（根据`file`字段判断）。
+- [x] `file-get`：支持`file-get`，提供可选的`mode`参数和可选的`type`参数
+- [x] `file-delete`：支持`file-delete`，要求登录，提供可选的`mode`（默认private）和可选的`type`参数
 - [ ] `file-move`：支持`ajax-post`，要求登录，提供`source`参数，`target`参数
 
 然后是上层的博客，数据库`post`中包含以下字段：
